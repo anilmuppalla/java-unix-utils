@@ -1,19 +1,35 @@
+/*
+ * Copyright Anil Muppalla.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.anil.junix;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LS {
 
@@ -33,7 +49,7 @@ public class LS {
 
     }
 
-    private String permissions(final Set<PosixFilePermission> p) {
+    private String permissions(final Set<PosixFilePermission> permissionSet) {
 
         Map<String, String> filePermsMap = new HashMap<>();
         filePermsMap.put("OWNER_READ", "r");
@@ -46,16 +62,22 @@ public class LS {
         filePermsMap.put("GROUP_EXECUTE", "x");
         filePermsMap.put("OTHERS_EXECUTE", "x");
 
-        List<String> permOrder = new ArrayList<>(Arrays.asList("OWNER_READ", "OWNER_WRITE", "OWNER_EXECUTE"));
+        List<String> permOrder = new ArrayList<>(Arrays.asList("OWNER_READ", "OWNER_WRITE", "OWNER_EXECUTE",
+                "GROUP_READ", "GROUP_WRITE", "GROUP_EXECUTE",
+                "OTHERS_READ", "OTHERS_WRITE", "OTHERS_EXECUTE"));
 
         StringBuilder sb = new StringBuilder();
 
+        List<String> filePerms = new ArrayList<>();
 
+        for (PosixFilePermission posixFilePermission : permissionSet) {
+            filePerms.add(posixFilePermission.name());
+        }
 
-        p.forEach(e -> {
-            String pp = filePermsMap.getOrDefault(e.name(), "-");
-            sb.append(pp);
-        });
+        for (String s : permOrder) {
+            String x = filePerms.contains(s) ? filePermsMap.get(s) : "-";
+            sb.append(x);
+        }
 
         return sb.toString();
     }
@@ -72,8 +94,8 @@ public class LS {
         }
 
         final long lm = file.lastModified();
-        DateTime dateTime = new DateTime(lm);
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("MMM d HH:mm");
+        final DateTime dateTime = new DateTime(lm);
+        final DateTimeFormatter formatter = DateTimeFormat.forPattern("MMM d HH:mm");
         final String lastModified = dateTime.toLocalDateTime().toString(formatter);
 
         try {
@@ -85,7 +107,7 @@ public class LS {
         try {
             ll.add(String.valueOf(file.length()));
         } catch (SecurityException se) {
-            logger.error("Failed to get total space", se);
+            logger.error("Failed to size of the file", se);
         }
 
         ll.add(lastModified);

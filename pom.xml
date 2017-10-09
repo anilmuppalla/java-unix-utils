@@ -8,15 +8,17 @@
     <artifactId>java-unix-utils</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <parent>
-        <groupId>com.spotify</groupId>
-        <artifactId>foss-root</artifactId>
-        <version>7</version>
-    </parent>
-
     <name>Java unix utils</name>
     <description>10 common unix tools</description>
     <url>https://github.com/anilmuppalla/java-unix-utils</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <dependencies>
         <dependency>
@@ -48,6 +50,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
